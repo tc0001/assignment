@@ -1,5 +1,4 @@
 #include<iostream>
-#include<string>
 #include<cctype>
 #include<fstream>
 #include<iomanip>
@@ -8,10 +7,10 @@ using namespace std;
 
 struct info
 {
-	string name;
-	string mykad;
-	string student_id;
-	string program;
+	char name[50];
+	char mykad[13];
+	char student_id[11];
+	char program[4];
 	char gender;
 	int year;
 
@@ -22,43 +21,46 @@ struct info
 		cout << "\n\n\n\n";
 		cout << "\n\t\t\t\t\tEnter candidate name	: ";
 		cin.ignore();
-		getline(cin,name);
+		cin.getline(name, 50);
 		cout << "\n\t\t\t\t\tEnter MyKad Number	: ";
-		getline(cin, mykad);
+		cin.get(mykad,13);
 		cout << "\n\t\t\t\t\tEnter Student ID	: ";
 		cin.ignore();
-		getline(cin, student_id);
+		cin.get(student_id,11);
 		cout << "\n\t\t\t\t\tProgram			: ";
-		cin.ignore();
-		getline(cin, program);
+		cin >> program;
 		cout << "\n\t\t\t\t\tGender			: ";
-		cin.ignore();
 		cin >> gender;
 		cout << "\n\t\t\t\t\tEnter Year of Study	: ";
-		cin.ignore();
 		cin >> year;
 
 		ifstream infile;
 		infile.open("nominee.dat", ios::binary | ios::in);
-		for (int i = 0; ((infile.read(reinterpret_cast<char*>(&nominee), sizeof(info)))); i++)
+		int i = 0;
+		while(((infile.read(reinterpret_cast<char*>(&nominee), sizeof(info)))))
 		{
-
+			if (strcmp(name, nominee.name) == 0)
+			{
+				dup = true;
+				cout << nominee.name;
+				cout << " is nominated already.";
+				infile.close();
+				cin.ignore();
+				cin.get();
+			}
+			else
+			{
+				i++;
+			}
 		}
-
-		if (name == nominee.name)
+		if(name != nominee.name)
 		{
-			dup = true;
-			cout << nominee.name;
-			cout << " is nominated already.";
-			infile.close();
+			dup = false;
+			ofstream outfile;
 			cin.ignore();
 			cin.get();
 		}
-
-		else
-		{
-			dup = false;
-		}
+		infile.close();
 	}
 
 	void showdetail()
@@ -91,8 +93,6 @@ int main()
 	char choice;
 	info nominee, student;
 	int vote[5] = { 0 };
-	ofstream outfile;
-	outfile.open("votecount.dat");
 	do {
 		system("cls");
 		displayMenu();
@@ -120,9 +120,8 @@ int main()
 			cin.ignore();
 			cin.get();
 		}
-		outfile << vote;
 	} while (choice != '3');
-	outfile.close();
+
 	return 0;
 }
 
@@ -168,48 +167,20 @@ void user(info& nominee, int(&vote)[5])
 
 void login(info& nominee, int(&vote)[5])
 {
-	char mykad[50];
+	char mykad[13];
 	char choice;
 	int count = 0;
 	char stud_id[11];
-	bool eligible = false;
-	do{
+	
+
 		system("cls");
 		cout << "\n\n\n\n";
-		cout << "\n\t\t\t\t\tMyKad Number(w/o '-') : ";
+		cout<<"\n\t\t\t\t\tMyKad Number(w/o '-') : ";
 		cin.ignore();
 		cin >> mykad;
-
 		cout << "\n\t\t\t\t\tStudent ID		: ";
 		cin.ignore();
 		cin >> stud_id;
-
-		info student;
-		ifstream infile;
-		infile.open("studentrecord.dat");
-		while ((infile >> student.mykad >> student.student_id));
-		{
-
-		}
-
-		if (mykad == student.mykad && stud_id == student.student_id)
-		{
-			eligible = true;
-			cout << "\n\t\t\t\t\tSuccessful Login";
-			cin.ignore();
-			cin.get();
-		}
-		else
-		{
-			eligible = false;
-			cout << "\n\t\t\t\t\tInvalid Mykad number or Student ID. Please try again.";
-			cin.ignore();
-			cin.get();
-		}
-
-
-	} while (eligible == false);
-		
 
 	do{
 		system("cls");
@@ -243,6 +214,8 @@ void login(info& nominee, int(&vote)[5])
 		}
 	} while (choice != '2');
 }
+
+
 
 
 void nominate(info& nominee, int(&vote)[5])
@@ -312,7 +285,6 @@ void castvote(info& nominee,int(&vote)[5])
 	cin >> choice;
 	system("cls");
 	ofstream outvote;
-	outvote.open("votecount.dat");
 	switch (choice)
 	{
 	case '1':
@@ -335,7 +307,6 @@ void castvote(info& nominee,int(&vote)[5])
 		cin.ignore();
 		cin.get();
 	}
-	outvote << vote;
 	outvote.close();
 	system("cls");	
 
@@ -357,14 +328,13 @@ void registration(info& student)
 	system("cls");
 	cout << "\t\t\t Enter the Mykad Number : ";
 	cin.ignore();
-	getline(cin, student.mykad);
+	cin >> student.mykad;
 	cout << "\t\t\t Enter the Student ID : ";
-	getline(cin, student.student_id);
+	cin >> student.student_id;
 
-	ofstream f1("studentrecord.dat", ios::app);
+	ofstream f1("studentrecord.txt", ios::app);
 	f1 << student.mykad << ' ' << student.student_id << endl;
 	cout << "\n\t\t\t Registration is successful! \n";
-	f1.close();
 	cin.ignore();
 	cin.get();
 	system("cls");
@@ -408,7 +378,7 @@ void administrator(info& nominee,info& student, int(&vote)[5])
 {
 	const string adminUser[3] = { "Pangzanlam", "Lawsonshow","Karryweng" };
 	const int password[3] = { 1397, 8519, 0462 };
-	char username[50];
+	string username;
 	int pw;
 	char choice;
 
@@ -444,6 +414,7 @@ void administrator(info& nominee,info& student, int(&vote)[5])
 			stat(nominee, student,vote);
 			break;
 		case '4':
+			main();
 			break;
 		default:
 			cout << "invalid";
@@ -496,8 +467,7 @@ void result(info& nominee, int(&vote)[5])
 {
 	system("cls");
 	char name[50] = { 0 };
-	string names[5], winner;
-	int largest = 0, tie = 0;
+	int largest=0;
 	ifstream infile;
 	infile.open("nominee.dat");
 	cout << "Voting Results\n";
@@ -505,23 +475,37 @@ void result(info& nominee, int(&vote)[5])
 	for (int i = 0; (infile.read(reinterpret_cast<char*>(&nominee), sizeof(info))) && i < 5; i++)
 	{
 		cout << "\nNominee " << i + 1 << " : " << nominee.name << "\nvote : " << vote[i] << endl;
-		names[i] = nominee.name;
 	}
 	infile.close();
 
-	infile.open("votecount.dat");
 	for(int i=1; i < 5;i++)
 	{
-		infile >> vote[i];
+		vote[0] = largest;
 		if (vote[0] < vote[i])
 		{
 			vote[0] = vote[i];
-			names[0] = names[i];
+			strcpy_s(name, nominee.name);
 		}
-		if (i == 4)
+	}
+
+	infile.open("nominee.dat");
+	infile.read(reinterpret_cast<char*>(&nominee), sizeof(info));
+	cout << "\nThe winner is: " << nominee.name;
+
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 4; j>= 0; j--)
 		{
-			cout << "\nThe Winner Is " << names[0] << "! ";
-			break;
+			infile.read(reinterpret_cast<char*>(&nominee), sizeof(info));
+			if (i == j)
+			{
+				break;
+			}
+			if (vote[i] = vote[j])
+			{
+				cout << "It is a tie between " << name << " and " << nominee.name;
+				cout << "\nAnother voting session will be held in 30 minutes.";
+			}
 		}
 	}
 	cin.ignore();
